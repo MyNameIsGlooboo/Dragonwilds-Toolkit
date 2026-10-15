@@ -25,6 +25,17 @@ def check_ui():
             path = os.path.join(ROOT, "ui", name)
             code = f"new Function(require('fs').readFileSync({path!r}, 'utf8'))"
             subprocess.run(["node", "-e", code], check=True)
+    # All scripts share one page, so two files declaring the same name break the later one
+    import re
+    html = open(os.path.join(ROOT, "ui", "index.html"), encoding="utf-8").read()
+    order = re.findall(r'<script src="([^"]+)"', html)
+    joined = "\n;\n".join(open(os.path.join(ROOT, "ui", n), encoding="utf-8").read().replace('"use strict";', "", 1)
+                          for n in order)
+    tmp = os.path.join(ROOT, "build", "all-scripts.js")
+    os.makedirs(os.path.dirname(tmp), exist_ok=True)
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(joined)
+    subprocess.run(["node", "-e", f"new Function(require('fs').readFileSync({tmp!r}, 'utf8'))"], check=True)
     print("UI scripts OK")
 
 

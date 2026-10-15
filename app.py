@@ -21,6 +21,7 @@ from dw.worldsave import WorldSave, WorldSaveError, get_container, list_containe
 from dw import features, cheats
 from dw.watcher import SaveWatcher
 from dw.version import TITLE, VERSION
+from dw import updates
 
 WATCHER = SaveWatcher()
 BACKPACK_SLOTS = 32  # backpack page; slots 32+ are the rune, ammo and quest pouches (dw.capacity)
@@ -702,6 +703,34 @@ class Api:
         if ST.world_file:
             out["worldView"] = self._world_view(WorldSave(self._world_path()))
         return out
+    # ------------------------------------------------------------- updates
+    @_safe
+    def update_check(self):
+        """Newer release on GitHub? Notice only; the user downloads it themselves."""
+        if not ST.settings.get("updateCheck", True):
+            return {"available": False, "enabled": False, "current": VERSION}
+        out = updates.check(ST.settings.get("skipVersion"))
+        out["enabled"] = True
+        return out
+
+    @_safe
+    def update_prefs(self, enabled=None, skip=None):
+        if enabled is not None:
+            ST.settings["updateCheck"] = bool(enabled)
+        if skip is not None:
+            ST.settings["skipVersion"] = str(skip)
+        core.save_settings(ST.settings)
+        return {"enabled": ST.settings.get("updateCheck", True), "skip": ST.settings.get("skipVersion")}
+
+    @_safe
+    def open_release_page(self, url=None):
+        """Open the release page in the normal web browser (only this project's GitHub pages)."""
+        import webbrowser
+        if not url or not url.startswith(f"https://github.com/{updates.REPO}/"):
+            url = updates.RELEASES_PAGE + "/latest"
+        webbrowser.open(url)
+        return {"ok": True}
+
     @_safe
     def open_folder(self, which):
         folder = {"backups": core.BACKUP_DIR,

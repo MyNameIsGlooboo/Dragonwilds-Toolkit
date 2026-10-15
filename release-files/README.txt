@@ -34,6 +34,7 @@ Numpad keys in game: 1 health+stamina, 2 carry 99999, 3 refill food/water/rest, 
 New features (teleport, moving gravestones, unlocks, adding items) are marked
 "check in game" - try them once and restore a backup if anything looks wrong.
 
-Updating: delete the old exe and use the new one. Your library, backups and settings
+Updating: the toolkit tells you when a new version is out (gold bar at the top). Download
+it, delete the old exe and use the new one. Your library, backups and settings
 are kept in %LOCALAPPDATA%\DragonwildsSaveEditor and carry over.
 Your game saves: %LOCALAPPDATA%\RSDragonwilds\Saved

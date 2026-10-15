@@ -46,6 +46,7 @@
   </nav>
 
   <main class="content" id="content">
+    <div id="updateBar" class="update-bar hidden"></div>
     <div id="banner" class="banner hidden"></div>
 
     <section id="tab-inventory" class="tab active">
@@ -248,6 +249,7 @@
             <button class="btn gold" id="buildBtn" disabled>Build library</button>
           </div>
           <pre id="buildLog" class="log"></pre>
+          <label class="hint update-pref"><input type="checkbox" id="updateToggle" checked> Tell me when a new version of the toolkit is out (checks GitHub once at start; nothing is downloaded)</label>
         </div>
       </div>
     </section>
@@ -282,5 +284,6 @@
 <script src="additems.js"></script>
 <script src="players.js"></script>
 <script src="devshots.js"></script>
+<script src="updates.js"></script>
 </body>
 </html>

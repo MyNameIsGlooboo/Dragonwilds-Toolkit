@@ -39,6 +39,12 @@ That's it. Nothing else to install.
 
 **You need:** Windows 10 or 11, the game installed, and to have played it once (so you have a save).
 
+### Updates
+- The toolkit tells you when a new version is out: a gold bar at the top with **What's new** and
+  **Download**. Download the new zip, unzip it and use the new exe. Your settings and backups carry over.
+  (Turn this off in **Game library** if you like. It only asks GitHub for the latest version number.)
+- Want an email too? Click **Watch → Custom → Releases** at the top of this page.
+
 ---
 
 ## What can I do with it?
