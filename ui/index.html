@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dragonwilds Toolkit</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-title">Dragonwilds</span>
+      <span class="brand-sub">Toolkit</span><span class="brand-ver" id="appVersion"></span>
+    </div>
+    <div class="top-center">
+      <label class="char-pick">Saves
+        <select id="rootSelect" title="Save folder"></select>
+      </label>
+      <label class="char-pick">Character
+        <select id="charSelect"></select>
+      </label>
+    </div>
+    <div class="top-right">
+      <span id="livePill" class="pill live hidden" title="The in-game cheat mod is connected">Live link on</span>
+      <span id="gamePill" class="pill">Checking game…</span>
+      <button class="btn ghost" id="reloadBtn" title="Read the save again from disk">Reload</button>
+    </div>
+  </header>
+
+  <nav class="sidenav" id="sidenav">
+    <div class="nav-sec">Character</div>
+    <button data-tab="inventory" class="active"><i class="ico ico-bag"></i>Inventory</button>
+    <button data-tab="skills"><i class="ico ico-star"></i>Skills</button>
+    <button data-tab="character"><i class="ico ico-heart"></i>Stats</button>
+    <button data-tab="unlocks"><i class="ico ico-key"></i>Unlocks</button>
+    <div class="nav-sec">World</div>
+    <button data-tab="world"><i class="ico ico-map"></i>World map</button>
+    <button data-tab="items"><i class="ico ico-gem"></i>Items</button>
+    <div class="nav-sec">Tools</div>
+    <button data-tab="cheats"><i class="ico ico-bolt"></i>Live cheats<span class="nav-dot" id="liveDot" title="Live cheats connected"></span></button>
+    <button data-tab="bundles"><i class="ico ico-box"></i>Presets</button>
+    <button data-tab="share"><i class="ico ico-share"></i>Share</button>
+    <button data-tab="backups"><i class="ico ico-clock"></i>Backups</button>
+    <div class="nav-spacer"></div>
+    <button data-tab="setup"><i class="ico ico-gear"></i>Game library</button>
+  </nav>
+
+  <main class="content" id="content">
+    <div id="banner" class="banner hidden"></div>
+
+    <section id="tab-inventory" class="tab active">
+      <div class="panel">
+        <div class="gear-split">
+          <div>
+            <div class="panel-head"><h2>Equipped</h2></div>
+            <div class="equip-row" id="equipRow"></div>
+          </div>
+          <div>
+            <div class="panel-head"><h2>Hotbar</h2><span class="hint">Shortcuts to backpack items</span></div>
+            <div class="hotbar-row" id="hotbarRow"></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel grow">
+        <div class="panel-head">
+          <h2>Bags</h2>
+          <div class="row-gap">
+            <input id="invSearch" class="search" placeholder="Find an item…">
+            <button class="btn gold" id="addItemsBtn">Add items…</button>
+          </div>
+        </div>
+        <div class="inv-pages" id="invGrid"></div>
+      </div>
+    </section>
+
+    <section id="tab-skills" class="tab">
+      <div class="panel grow">
+        <div class="panel-head"><h2>Skills</h2><span class="hint">Levels use the game's own XP table</span></div>
+        <div class="skills" id="skillsGrid"></div>
+      </div>
+    </section>
+
+    <section id="tab-character" class="tab">
+      <div class="panel">
+        <div class="panel-head"><h2>Survival meters</h2></div>
+        <div class="vitals" id="vitals"></div>
+      </div>
+      <div class="panel grow">
+        <div class="panel-head"><h2>Progress</h2><span class="hint">View only</span></div>
+        <div class="facts" id="facts"></div>
+      </div>
+    </section>
+
+    <section id="tab-world" class="tab world-tab">
+      <div class="world-layout">
+        <div class="panel world-side">
+          <div class="world-side-head">
+            <select id="worldSelect" title="World save"></select>
+            <div class="seg" id="worldSeg">
+              <button data-seg="places" class="on">Places</button>
+              <button data-seg="find">Find item</button>
+              <button data-seg="layers">Layers</button>
+            </div>
+          </div>
+          <div class="seg-body" id="seg-places">
+            <input id="placeSearch" class="search" placeholder="Filter by name or item…">
+            <div class="chips" id="placeKinds"></div>
+            <div class="place-list" id="placeList"></div>
+          </div>
+          <div class="seg-body hidden" id="seg-find">
+            <input id="findItem" class="search" placeholder="Which item? e.g. Iron Bar">
+            <div class="hint pad0">Searches every chest and station in this world.</div>
+            <div class="place-list" id="findList"></div>
+          </div>
+          <div class="seg-body hidden" id="seg-layers">
+            <div class="layer-list" id="layerList"></div>
+            <label class="layer-row"><input type="checkbox" id="gridToggle"> <span>Map cell grid (12,800 units)</span></label>
+          </div>
+        </div>
+
+        <div class="panel world-map">
+          <div class="map-toolbar">
+            <button class="btn small" id="flyMe" title="Centre on your character's last position">My position</button>
+            <button class="btn small" id="flyBase" title="Centre on your storage">My base</button>
+            <button class="btn small" id="selectTool" title="Drag a box around chests to select them for the organizer">Select chests</button>
+            <span class="map-spacer"></span>
+            <span class="hint" id="mapCoords"></span>
+            <button class="btn small" id="zoomOut" title="Zoom out">−</button>
+            <button class="btn small" id="zoomIn" title="Zoom in">+</button>
+            <button class="btn small" id="zoomFit" title="Show the whole map">Fit</button>
+          </div>
+          <div class="map-wrap" id="mapWrap">
+            <div class="map-stage" id="mapStage">
+              <img id="mapImg" alt="">
+              <div id="mapMarkers"></div>
+            </div>
+            <canvas id="mapCanvas"></canvas>
+            <div class="map-tip hidden" id="mapTip"></div>
+            <div class="map-box hidden" id="mapBox"></div>
+            <div class="ctx hidden" id="mapCtx"></div>
+            <div class="map-empty hidden" id="mapEmpty"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>World settings</h2><span class="hint" id="worldMeta"></span></div>
+        <div class="world-settings" id="worldSettings"></div>
+      </div>
+    </section>
+    <section id="tab-items" class="tab">
+      <div class="panel grow">
+        <div class="panel-head">
+          <h2>Items</h2>
+          <div class="row-gap">
+            <input id="itemSearch" class="search" placeholder="Search all items…">
+            <select id="itemCat"><option value="">All categories</option></select>
+            <label class="hint"><input type="checkbox" id="itemOwned"> Only what I own</label>
+          </div>
+        </div>
+        <div class="enc-grid" id="encGrid"></div>
+      </div>
+    </section>
+
+    <section id="tab-unlocks" class="tab">
+      <div class="panel grow">
+        <div class="panel-head"><h2>Unlocks</h2><span class="hint" id="unlockNote"></span></div>
+        <div class="pad" id="unlockBody"><p class="hint">Unlock names are being added. Rebuild the game library after this update.</p></div>
+      </div>
+    </section>
+
+    <section id="tab-share" class="tab">
+      <div class="panel">
+        <div class="panel-head"><h2>Give a world to a friend</h2></div>
+        <div class="pad">
+          <p class="hint">Packs the world into one zip on your Desktop. Your character isn't included. Your friend installs it with "Install a world" below (or copies the .sav into their SaveGames folder) and hosts it.</p>
+          <div class="row-gap"><select id="shareWorld"></select><button class="btn gold" id="packBtn">Pack world</button></div>
+          <p class="hint" id="packResult"></p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Install a world from a friend</h2></div>
+        <div class="pad">
+          <p class="hint">Pick the zip (or .sav) your friend sent. If you already have a world with the same name, it is backed up first. Quit the game before installing.</p>
+          <button class="btn gold" id="installBtn">Install a world…</button>
+          <p class="hint" id="installResult"></p>
+        </div>
+      </div>
+    </section>
+    <section id="tab-cheats" class="tab">
+      <div class="panel">
+        <div class="panel-head"><h2>Live cheats</h2><span class="hint" id="cheatStatus">Checking…</span></div>
+        <div class="pad" id="cheatSetup"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Players in your world</h2><span class="hint">When you host, you control everyone here. Their game shows the changes.</span></div>
+        <div class="players" id="playerList"></div>
+      </div>
+      <div class="panel grow">
+        <div class="panel-head">
+          <h2>Cheats</h2>
+          <div class="row-gap">
+            <button class="btn small" id="cheatReapply" title="Send all switched-on cheats again (after loading a world)">Re-apply my cheats</button>
+            <input id="cheatSearch" class="search" placeholder="Search all game commands…">
+          </div>
+        </div>
+        <div class="cheat-groups" id="cheatGroups"></div>
+        <details class="pad dev-cmds"><summary class="hint">Game developer commands (advanced; most do nothing in this game version)</summary>
+        <div class="cheat-all" id="cheatAll"></div></details>
+        <pre class="log" id="cheatLog"></pre>
+      </div>
+    </section>
+    <section id="tab-bundles" class="tab">
+      <div class="panel grow">
+        <div class="panel-head"><h2>Presets</h2><span class="hint">Fill your backpack or a chest in one click. Nothing is saved until you review and save.</span></div>
+        <div class="presets" id="presetList"></div>
+        <div class="panel-head"><h2>Quick fixes</h2></div>
+        <div class="bundles" id="bundles"></div>
+      </div>
+    </section>
+
+    <section id="tab-backups" class="tab">
+      <div class="panel grow">
+        <div class="panel-head">
+          <h2>Backups</h2>
+          <div class="row-gap">
+            <button class="btn" id="backupNowBtn">Back up now</button>
+            <label class="hint"><input type="checkbox" id="watchToggle" checked> Back up every game save while the editor is open</label>
+            <button class="btn ghost" id="openBackupsBtn">Open folder</button>
+          </div>
+        </div>
+        <p class="hint pad">A backup is made automatically before every save. The newest 20 automatic backups are kept; manual ones are never deleted.</p>
+        <div class="backup-list" id="backupList"></div>
+      </div>
+    </section>
+
+    <section id="tab-setup" class="tab">
+      <div class="panel grow">
+        <div class="panel-head"><h2>Game library</h2></div>
+        <div class="pad setup">
+          <div class="checks" id="setupChecks"></div>
+          <div id="setupMsg"></div>
+          <p>The toolkit reads item names, pictures and the world map from your own game install, so RuneScape: Dragonwilds must be installed on this PC. Pick the game folder, then build the library (about a minute). This happens only once.</p>
+          <div id="dirList" class="dir-list"></div>
+          <div class="row-gap">
+            <button class="btn ghost" id="scanBtn">Scan all drives</button>
+            <button class="btn ghost" id="browseBtn">Browse…</button>
+            <button class="btn gold" id="buildBtn" disabled>Build library</button>
+          </div>
+          <pre id="buildLog" class="log"></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <aside class="detail" id="detail">
+    <div class="detail-empty">Select an item to see and edit it.</div>
+  </aside>
+
+  <footer class="changes" id="changes">
+    <div class="changes-text"><strong id="changeCount">No changes</strong><span id="changeSummary"></span></div>
+    <div class="row-gap">
+      <button class="btn ghost" id="discardBtn" disabled>Discard</button>
+      <button class="btn gold" id="reviewBtn" disabled>Review &amp; save</button>
+    </div>
+  </footer>
+</div>
+
+<div id="modal" class="modal hidden">
+  <div class="modal-box">
+    <div class="modal-head"><h2 id="modalTitle"></h2><button class="x" id="modalClose" title="Close">×</button></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot" id="modalFoot"></div>
+  </div>
+</div>
+<div id="toast" class="toast hidden"></div>
+<script src="app.js"></script>
+<script src="world.js"></script>
+<script src="extras.js"></script>
+<script src="unlocks.js"></script>
+<script src="cheats.js"></script>
+<script src="additems.js"></script>
+<script src="players.js"></script>
+<script src="devshots.js"></script>
+</body>
+</html>

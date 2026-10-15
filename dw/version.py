@@ -1,0 +1,5 @@
+﻿"""App name and version. Change VERSION here only; the window, the top bar and the exe name follow it."""
+APP_NAME = "Dragonwilds Toolkit"
+VERSION = "1.3.1"
+TITLE = f"{APP_NAME} v{VERSION}"
+USER_AGENT = f"DragonwildsToolkit/{VERSION}"
