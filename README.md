@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="../../releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/MyNameIsGlooboo/Dragonwilds-Toolkit?label=download&color=d9b45f"></a>
+  <a href="../../releases/latest"><img alt="Download the latest release" src="https://img.shields.io/badge/download-latest%20release-d9b45f"></a>
   <a href="../../releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/MyNameIsGlooboo/Dragonwilds-Toolkit/total?color=8c7442"></a>
   <img alt="Windows" src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6">
   <a href="LICENSE"><img alt="MIT licence" src="https://img.shields.io/badge/licence-MIT-informational"></a>
