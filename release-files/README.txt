@@ -29,7 +29,7 @@ gravestone, send them anywhere (right-click the World map), speed them up, let t
 or freeze them. Their live
 positions show on the World map. Only the host needs the toolkit for this.
 Numpad keys in game: 1 health+stamina, 2 carry 99999, 3 refill food/water/rest, 4 heal,
-5 durability, 6 no hunger, 7 speed, 8 jump, 9 latest gravestone, . back after teleport,
+5 durability, 6 no hunger, 7 speed, 8 damage x10, 9 latest gravestone, . back after teleport,
 0 all back to normal, + flying, - home, / set home here, * hide/show top bar.
 New features (teleport, moving gravestones, unlocks, adding items) are marked
 "check in game" - try them once and restore a backup if anything looks wrong.

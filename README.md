@@ -92,7 +92,7 @@ A backup is made before every save. Changed your mind? **Backups** → **Restore
 | Num 5 | Tools never break | Num − | Go home |
 | Num 6 | No hunger | Num / | Set home here |
 | Num 7 | Speed ×2 | Num * | Show/hide the top bar |
-| Num 8 | Jump ×3 | | |
+| Num 8 | Damage you deal ×10 | | |
 
 Num Lock must be on. **Uninstall cheats** removes everything from the game folder.
 

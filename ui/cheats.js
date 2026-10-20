@@ -7,7 +7,7 @@ const C = { status: null, fns: [], wanted: {}, lastSeq: 0, timer: null };
 const LIVE = [
   ["Player", [
     { type: "switch", key: "god", label: "Unlimited health and stamina", desc: "Max health 999, healed to full all the time, can't die, stamina always full." },
-    { type: "number", key: "damage", label: "Damage multiplier", desc: "1 = normal, 10 = ten times the damage.", def: 5, min: 0, max: 100 },
+    { type: "number", key: "damage", label: "Damage you deal", desc: "Melee, ranged and magic. 1 = normal, 10 = ten times. Num 8 sets ×10.", def: 5, min: 0, max: 100 },
     { type: "number", key: "falldamage", label: "Fall damage multiplier", desc: "0 = no fall damage.", def: 0, min: 0, max: 5 },
     { type: "action", fn: "dw.heal", label: "Full health and stamina now" },
   ]],
@@ -262,7 +262,7 @@ function controlFor(c) {
 const HOTKEY_HELP = [
   ["Num 1", "Unlimited health + stamina on/off"], ["Num 2", "Carry limit 99999 on/off"], ["Num 3", "Refill food, water, rest"],
   ["Num 4", "Full health and stamina"], ["Num 5", "Unlimited durability on/off"], ["Num 6", "No hunger/thirst/tiredness on/off"],
-  ["Num 7", "Speed ×2 on/off"], ["Num 8", "Jump ×3 on/off"], ["Num 9", "Teleport to my latest gravestone"], ["Num .", "Go back after a teleport"], ["Num 0", "All cheats back to normal"], ["Num +", "Flying on/off"], ["Num −", "Teleport home"], ["Num /", "Set home where you stand"], ["Num *", "Top bar show/hide"],
+  ["Num 7", "Speed ×2 on/off"], ["Num 8", "Damage dealt ×10 on/off"], ["Num 9", "Teleport to my latest gravestone"], ["Num .", "Go back after a teleport"], ["Num 0", "All cheats back to normal"], ["Num +", "Flying on/off"], ["Num −", "Teleport home"], ["Num /", "Set home where you stand"], ["Num *", "Top bar show/hide"],
 ];
 
 function drawCheatGroups() {

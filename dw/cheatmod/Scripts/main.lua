@@ -15,7 +15,7 @@ local UEHelpers = require("UEHelpers")
 local DIR = "ue4ss/Mods/DWEditorCheats/"
 -- Raise when this script changes. The toolkit compares it with the script it ships and asks
 -- you to restart the game when the running one is older (the game reads it only at start).
-local MOD_VERSION = 4
+local MOD_VERSION = 5
 local CHEAT_CLASSES = {
     "/Script/Dominion.DominionCheatManager",
     "/Script/Engine.CheatManager",
@@ -404,10 +404,47 @@ end
 local ATTRS = {
     carry = { "MaxCarryWeightAttribute" },
     xp = { "XpModifierAttribute" },
-    damage = { "DamageModifierAttribute" },
+    -- damage you deal (melee, ranged and magic). DamageModifierAttribute is damage you take.
+    damage = { "DamageMultiplierAllCombatStylesAttribute" },
     falldamage = { "FallDamageMultiplier" },
-    nohunger = { "SustenanceDecayMultiplier", "HydrationDecayMultiplier", "EnduranceDecayMultiplier" },
+    nohunger = { "SustenanceDecayMultiplier", "HydrationDecayMultiplier", "EnduranceDecayMultiplier",
+                 "EnduranceReductionRatePerInGameHour" },
 }
+
+-- No hunger: food and water use their own hourly decay rate (the multipliers above don't stop
+-- them), so set those rates to 0 and keep all three meters full. D keeps the normal rates.
+local function HungerLock(p, on, D)
+    local s, h, e = p.SustenanceComponent, p.HydrationComponent, p.EnduranceComponent
+    if on then
+        if D.attr.sustRate == nil and s.DecayRatePerHour > 0 then
+            D.attr.sustRate = s.DecayRatePerHour
+            D.save("sustRate", s.DecayRatePerHour)
+        end
+        if D.attr.hydRate == nil and h.DecayRatePerHour > 0 then
+            D.attr.hydRate = h.DecayRatePerHour
+            D.save("hydRate", h.DecayRatePerHour)
+        end
+        if s.DecayRatePerHour ~= 0 then s.DecayRatePerHour = 0 end
+        if h.DecayRatePerHour ~= 0 then h.DecayRatePerHour = 0 end
+        local ms = s.CurrentMaxSustenance - s.CurrentSustenance
+        if ms > 0.5 then s:AddSustenance(ms, 0) end
+        local mh = h.CurrentMaxHydration - h.CurrentHydration
+        if mh > 0.5 then h:AddHydration(mh, 0) end
+        local me = e.MaxEndurance - e.CurrentEndurance
+        if me > 0.5 then e:AddEndurance(me, 0) end
+    else
+        if D.attr.sustRate then s.DecayRatePerHour = D.attr.sustRate end
+        if D.attr.hydRate then h.DecayRatePerHour = D.attr.hydRate end
+    end
+end
+
+-- Versions before MOD_VERSION 5 changed DamageModifierAttribute (damage taken) for "damage";
+-- put it back once if one of them left it changed.
+local function LegacyDamageFix(ac, idx, D)
+    if D.legacyDamageDone then return end
+    D.legacyDamageDone = true
+    if D.attr["DamageModifierAttribute"] ~= nil then SetAttr(ac, idx, "DamageModifierAttribute", nil, D) end
+end
 
 -- ------------------------------------------------------------------ overlay
 -- A see-through bar along the top of the screen listing every numpad key and its state,
@@ -418,7 +455,7 @@ local Overlay = { widget = nil, texts = {}, last = {} }
 local BAR = {
     { "1 Health+Stamina", "god" }, { "2 Carry 99999", "carry" }, { "3 Refill" }, { "4 Heal" },
     { "5 Durability", "durability" }, { "6 No hunger", "nohunger" }, { "7 Speed", "walk", 2 },
-    { "8 Jump", "jump", 3 }, { "9 Gravestone" }, { ". Back" }, { "0 Normal" }, { "+ Fly", "fly" },
+    { "8 Damage", "damage", 10 }, { "9 Gravestone" }, { ". Back" }, { "0 Normal" }, { "+ Fly", "fly" },
     { "- Home" }, { "/ Set home" }, { "* Hide bar" },
 }
 local GREEN = { SpecifiedColor = { R = 0.5, G = 1.0, B = 0.45, A = 1.0 }, ColorUseRule = 0 }
@@ -577,6 +614,12 @@ local function ApplyWanted()
                 if v ~= nil or Defaults.attr[name] ~= nil then SetAttr(ac, idx, name, v) end
             end
         end
+        LegacyDamageFix(ac, idx, Defaults)
+    end)
+
+    pcall(function()
+        if w.nohunger == 1 or Defaults.hungerOn then HungerLock(p, w.nohunger == 1, Defaults) end
+        Defaults.hungerOn = (w.nohunger == 1)
     end)
 
     -- speed: walking, running, sprinting and mount speeds move together
@@ -950,6 +993,12 @@ local function ApplyPlayer(pl, w)
             end
             d.on[key] = (v ~= nil) or nil
         end
+        LegacyDamageFix(ac, idx, d)
+    end)
+
+    pcall(function()
+        if w.nohunger == 1 or d.on.hunger then HungerLock(p, w.nohunger == 1, d) end
+        d.on.hunger = (w.nohunger == 1) or nil
     end)
 
     -- movement: freeze holds them in place; speed (test) multiplies walking, running, sprinting
@@ -1300,7 +1349,7 @@ local HOTKEYS = {
     { Key.NUM_FIVE, function() Toggle("durability", 1) end },
     { Key.NUM_SIX, function() Toggle("nohunger", 1) end },
     { Key.NUM_SEVEN, function() Toggle("walk", 2) end },
-    { Key.NUM_EIGHT, function() Toggle("jump", 3) end },
+    { Key.NUM_EIGHT, function() Toggle("damage", 10) end },
     { Key.NUM_NINE, function() Do("dw.grave") end },
     { Key.DECIMAL, function() Do("dw.return") end },
     { Key.NUM_ZERO, function() Do("dw.normal") end },

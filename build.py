@@ -70,7 +70,7 @@ def fetch_vendor():
 
 
 def build_exe():
-    args = [os.path.join(ROOT, ".venv", "Scripts", "pyinstaller.exe"), "--noconfirm", "--onefile", "--windowed",
+    args = [os.path.join(ROOT, ".venv", "Scripts", "python.exe"), "-m", "PyInstaller", "--noconfirm", "--onefile", "--windowed",
             "--name", EXE_NAME, "--version-file", version_file(),
             "--add-data", "ui;ui", "--add-data", "dw\\cheatmod;dw\\cheatmod", "--add-data", "vendor;vendor",
             "--collect-all", "webview"]

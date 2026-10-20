@@ -11,7 +11,7 @@ const PLAYER_SWITCHES = [
   { key: "durability", label: "Unlimited durability", value: 1 },
   { key: "carry", label: "Carry limit 99999", value: 99999 },
   { key: "xp", label: "XP ×3", value: 3 },
-  { key: "damage", label: "Damage ×5", value: 5 },
+  { key: "damage", label: "Damage dealt ×5", value: 5 },
   { key: "falldamage", label: "No fall damage", value: 0 },
   { key: "walk", label: "Speed ×2 (test)", value: 2, test: true },
   { key: "fly", label: "Flying (test)", value: 1, test: true },
