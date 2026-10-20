@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dragonwilds Toolkit - in game</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="overlay.css">
+</head>
+<body class="ov-body">
+<div class="ov">
+  <header class="ov-top">
+    <div class="brand"><span class="brand-title">Dragonwilds</span><span class="brand-sub">Toolkit · in game</span></div>
+    <span class="pill live" id="ovState">Game paused</span>
+    <span class="ov-spacer"></span>
+    <span class="hint">Esc or F7 to go back to the game</span>
+    <button class="x" id="ovClose" title="Back to the game (Esc)">×</button>
+  </header>
+
+  <main class="ov-main">
+    <section class="ov-col">
+      <div class="panel ov-god" id="godCard">
+        <div class="ov-god-text">
+          <h2>God mode</h2>
+          <p class="hint">Everything at once: unkillable, damage ×100, always critical, no stamina cost, unlimited jumps, speed ×3, no hunger, free spells, endless arrows, free building and crafting.</p>
+        </div>
+        <div class="switch big" id="godSwitch"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Cheats</h2><span class="hint">Click to switch</span></div>
+        <div class="ov-switches" id="ovSwitches"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Do it now</h2></div>
+        <div class="ov-actions" id="ovActions"></div>
+      </div>
+    </section>
+
+    <section class="ov-col">
+      <div class="panel ov-give">
+        <div class="panel-head">
+          <h2>Give item</h2>
+          <input class="search" id="ovSearch" placeholder="Search items…">
+        </div>
+        <div class="ov-items" id="ovItems"></div>
+        <div class="ov-give-bar hidden" id="ovGiveBar">
+          <img id="ovGiveIcon" alt="">
+          <span id="ovGiveName"></span>
+          <input type="number" id="ovGiveCount" min="1" value="1">
+          <button class="btn gold" id="ovGiveGo">Give</button>
+        </div>
+      </div>
+
+      <div class="panel hidden" id="ovFriendsPanel">
+        <div class="panel-head"><h2>Friends in your world</h2></div>
+        <div class="ov-friends" id="ovFriends"></div>
+      </div>
+    </section>
+  </main>
+  <div class="ov-log" id="ovLog"></div>
+</div>
+<div id="toast" class="toast hidden"></div>
+<script src="overlay.js"></script>
+</body>
+</html>

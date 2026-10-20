@@ -1,0 +1,45 @@
+/* In-game window: same look as the toolkit, laid out for a quick glance over the game */
+.ov-body { overflow: hidden; }
+.ov { display: flex; flex-direction: column; height: 100vh; border: 1px solid var(--gold-dim); }
+.ov-top { display: flex; align-items: center; gap: 14px; padding: 10px 18px; border-bottom: 1px solid var(--gold-dim);
+  background: url("/lib/ui/T_HUD_MenuNav_Background.png") center/cover, #18181d; -webkit-app-region: drag; }
+.ov-top .x, .ov-top button { -webkit-app-region: no-drag; }
+.ov-spacer { flex: 1; }
+.ov-main { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 14px; overflow: auto; }
+.ov-col { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+
+.ov-god { display: flex; align-items: center; gap: 18px; padding: 16px 18px; border-color: var(--gold);
+  background: linear-gradient(120deg, rgba(217,180,95,.16), rgba(217,180,95,.03)); }
+.ov-god-text { flex: 1; }
+.ov-god p { margin: 6px 0 0; }
+.ov-god.on { box-shadow: 0 0 0 1px var(--gold), 0 0 24px rgba(217,180,95,.25); }
+.switch.big { width: 64px; height: 32px; border-radius: 16px; }
+.switch.big::after { width: 24px; height: 24px; top: 3px; left: 3px; }
+.switch.big.on::after { left: 35px; }
+
+.ov-switches { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; padding: 12px 18px 16px; }
+.ov-sw { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 5px; cursor: pointer; border: 1px solid transparent; }
+.ov-sw:hover { background: rgba(255,255,255,.04); border-color: var(--line); }
+.ov-sw .switch { pointer-events: none; }
+.ov-sw.from-god span { color: var(--gold); }
+
+.ov-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 12px 18px 16px; }
+.ov-actions .btn { text-align: left; }
+
+.ov-give { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.ov-give .search { width: 220px; }
+.ov-items { flex: 1; min-height: 120px; overflow: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
+  gap: 6px; padding: 12px 18px; align-content: start; }
+.ov-items .pick img { width: 52px; height: 52px; }
+.ov-give-bar { display: flex; align-items: center; gap: 10px; padding: 10px 18px 14px; border-top: 1px solid var(--line); }
+.ov-give-bar img { width: 40px; height: 40px; object-fit: contain; }
+.ov-give-bar span { flex: 1; font-weight: 500; }
+.ov-give-bar input { width: 90px; }
+
+.ov-friends { display: flex; flex-direction: column; gap: 8px; padding: 12px 18px 16px; }
+.ov-friend { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 10px; background: #17171c;
+  border: 1px solid var(--line); border-radius: var(--radius); }
+.ov-friend b { font-weight: 500; margin-right: auto; }
+
+.ov-log { padding: 6px 18px; font-size: 12px; color: var(--text-dim); border-top: 1px solid var(--line); min-height: 28px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

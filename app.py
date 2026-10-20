@@ -22,6 +22,7 @@ from dw import features, cheats
 from dw.watcher import SaveWatcher
 from dw.version import TITLE, VERSION
 from dw import updates
+from dw import overlay as overlay_mod
 
 WATCHER = SaveWatcher()
 BACKPACK_SLOTS = 32  # backpack page; slots 32+ are the rune, ammo and quest pouches (dw.capacity)
@@ -703,6 +704,14 @@ class Api:
         if ST.world_file:
             out["worldView"] = self._world_view(WorldSave(self._world_path()))
         return out
+    # ------------------------------------------------------------- in-game overlay
+    @_safe
+    def overlay_close(self):
+        """Close the in-game window (the game resumes)."""
+        if OVERLAY:
+            OVERLAY.close()
+        return {"ok": True}
+
     # ------------------------------------------------------------- updates
     @_safe
     def update_check(self):
@@ -738,6 +747,14 @@ class Api:
         if folder and os.path.isdir(folder):
             subprocess.Popen(["explorer", folder])
         return {"ok": True}
+
+
+OVERLAY = None
+
+
+def _mod_folder(api):
+    w = cheats.win64_dir(api._game_dir())
+    return cheats.mod_dir(w) if w else None
 
 
 WEBVIEW2_GUID = "{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}"
@@ -815,7 +832,13 @@ def main():
                                        js_api=api, width=1360, height=860, min_size=(1080, 700),
                                        background_color="#14100c")
         ST.window = window
-        webview.start(debug="--debug" in sys.argv)
+        # in-game window: hidden until F7 is pressed in the game
+        global OVERLAY
+        OVERLAY = overlay_mod.Overlay(lambda: _mod_folder(api))
+        over = webview.create_window(overlay_mod.Overlay.TITLE, f"http://127.0.0.1:{port}/overlay.html",
+                                     js_api=api, width=1180, height=760, frameless=True, on_top=True,
+                                     hidden=True, background_color="#100e0c")
+        webview.start(lambda: OVERLAY.start(over), debug="--debug" in sys.argv)
     except Exception:
         log_crash("window")
         message_box("Dragonwilds Toolkit couldn't open its window.\n\n"

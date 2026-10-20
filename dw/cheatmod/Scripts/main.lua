@@ -15,7 +15,7 @@ local UEHelpers = require("UEHelpers")
 local DIR = "ue4ss/Mods/DWEditorCheats/"
 -- Raise when this script changes. The toolkit compares it with the script it ships and asks
 -- you to restart the game when the running one is older (the game reads it only at start).
-local MOD_VERSION = 10
+local MOD_VERSION = 11
 local CHEAT_CLASSES = {
     "/Script/Dominion.DominionCheatManager",
     "/Script/Engine.CheatManager",
@@ -1468,7 +1468,7 @@ local MENU_ITEMS = {
     { "Hide the top bar", "hideoverlay", 1 },
 }
 local GOLD = { SpecifiedColor = { R = 0.95, G = 0.8, B = 0.45, A = 1.0 }, ColorUseRule = 0 }
-local Menu = { open = false, sel = 1, widget = nil, rows = {}, paused = false, frozen = false, canDieWasSet = false }
+local Menu = { open = false, sel = 1, widget = nil, rows = {}, paused = false, frozen = false, overlay = false }
 
 local function MenuText(box, tree, name, text, size, color)
     local t = New("/Script/UMG.TextBlock", tree, name)
@@ -1592,7 +1592,49 @@ local function MenuActivate()
     ExecuteInGameThread(function() pcall(DrawMenu) end)
 end
 
-pcall(function() RegisterKeyBind(Key.F7, function() SetMenuOpen(not Menu.open) end) end)
+-- When the toolkit is running (it writes toolkit.txt every 2 s), F7 asks it to show its own window
+-- over the game instead: overlay.txt says "open" or "closed"; either side may change it.
+local function ToolkitAlive()
+    local f = io.open(DIR .. "toolkit.txt", "r")
+    if not f then return false end
+    local t = tonumber(f:read("*l") or "")
+    f:close()
+    return t ~= nil and math.abs(os.time() - t) < 6
+end
+
+local function OverlayState()
+    local f = io.open(DIR .. "overlay.txt", "r")
+    if not f then return nil end
+    local s = f:read("*l")
+    f:close()
+    return s
+end
+
+local function OverlayPressed()
+    if Menu.open then SetMenuOpen(false) return end
+    if Menu.overlay then
+        write("overlay.txt", "closed\n")
+        Menu.overlay = false
+        ExecuteInGameThread(function() pcall(MenuFreeze, false) end)
+    elseif ToolkitAlive() then
+        Menu.overlay = true
+        write("overlay.txt", "open\n")
+        ExecuteInGameThread(function() pcall(MenuFreeze, true) end)
+    else
+        SetMenuOpen(true)
+    end
+end
+
+-- called from the main loop: the toolkit window was closed (Esc, F7 or the close button there)
+local function OverlayWatch()
+    if Menu.overlay and OverlayState() == "closed" then
+        Menu.overlay = false
+        ExecuteInGameThread(function() pcall(MenuFreeze, false) end)
+    end
+end
+write("overlay.txt", "closed\n")
+
+pcall(function() RegisterKeyBind(Key.F7, OverlayPressed) end)
 pcall(function() RegisterKeyBind(Key.UP_ARROW, function() MenuMove(-1) end) end)
 pcall(function() RegisterKeyBind(Key.DOWN_ARROW, function() MenuMove(1) end) end)
 pcall(function() RegisterKeyBind(Key.RIGHT_ARROW, MenuActivate) end)
@@ -1667,6 +1709,7 @@ end
 local tick = 0
 LoopAsync(500, function()
     tick = tick + 1
+    pcall(OverlayWatch)
     local pending = {}
     for _, c in ipairs(ReadCommands()) do
         if c.seq > lastSeq then
