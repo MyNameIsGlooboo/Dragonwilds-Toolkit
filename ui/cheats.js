@@ -5,6 +5,9 @@
 const C = { status: null, fns: [], wanted: {}, lastSeq: 0, timer: null };
 
 const LIVE = [
+  ["God mode", [
+    { type: "switch", key: "godmode", label: "God mode", desc: "Everything at once: unlimited health and stamina, damage dealt ×100, always critical, no stamina cost, no hunger, speed ×3, unlimited durability, carry 999,999, XP ×10, no fall damage, free spells, endless arrows, free building, crafting and repairs, more ore and logs, no poison or bleeding, animals ignore you. Num 1." },
+  ]],
   ["Player", [
     { type: "switch", key: "god", label: "Unlimited health and stamina", desc: "Max health 999, healed to full all the time, can't die, stamina always full." },
     { type: "number", key: "damage", label: "Damage you deal", desc: "Melee, ranged and magic. 1 = normal, 10 = ten times. Num 8 sets ×10.", def: 5, min: 0, max: 100 },
@@ -260,7 +263,7 @@ function controlFor(c) {
 }
 
 const HOTKEY_HELP = [
-  ["Num 1", "Unlimited health + stamina on/off"], ["Num 2", "Carry limit 99999 on/off"], ["Num 3", "Refill food, water, rest"],
+  ["Num 1", "God mode (everything) on/off"], ["Num 2", "Carry limit 99999 on/off"], ["Num 3", "Refill food, water, rest"],
   ["Num 4", "Full health and stamina"], ["Num 5", "Unlimited durability on/off"], ["Num 6", "No hunger/thirst/tiredness on/off"],
   ["Num 7", "Speed ×2 on/off"], ["Num 8", "Damage dealt ×10 on/off"], ["Num 9", "Teleport to my latest gravestone"], ["Num .", "Go back after a teleport"], ["Num 0", "All cheats back to normal"], ["Num +", "Flying on/off"], ["Num −", "Teleport home"], ["Num /", "Set home where you stand"], ["Num *", "Top bar show/hide"],
 ];

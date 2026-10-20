@@ -208,7 +208,7 @@ def uninstall(game_dir):
 
 
 # Switch-type cheats the mod keeps applied (key -> number). See main.lua ApplyWanted.
-WANTED_KEYS = {"god", "stamina", "durability", "nohunger", "carry", "xp", "damage", "falldamage", "walk", "jump", "fly", "hideoverlay"}
+WANTED_KEYS = {"godmode", "god", "stamina", "durability", "nohunger", "carry", "xp", "damage", "falldamage", "walk", "jump", "fly", "hideoverlay"}
 
 
 def read_wanted(game_dir):
@@ -341,7 +341,7 @@ def reset_values(game_dir):
 
 # ------------------------------------------------------------------ other players
 # As host, the mod applies these to other players' characters on the server.
-PLAYER_KEYS = {"god", "durability", "nohunger", "carry", "xp", "damage", "falldamage", "freeze", "walk", "fly"}
+PLAYER_KEYS = {"godmode", "god", "durability", "nohunger", "carry", "xp", "damage", "falldamage", "freeze", "walk", "fly"}
 PLAYER_ACTIONS = {"dw.p.heal", "dw.p.refill", "dw.p.give", "dw.p.take", "dw.p.bring", "dw.p.goto",
                   "dw.p.home", "dw.p.revealmap", "dw.p.normal", "dw.p.grave", "dw.p.gotograve",
                   "dw.p.back", "dw.p.tp", "dw.p.inspect"}

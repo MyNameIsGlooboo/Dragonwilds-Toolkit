@@ -520,3 +520,6 @@ body, .detail { font-size: 14px; }
 .update-bar .x { font-size: 20px; padding: 0 4px; }
 .release-notes { white-space: pre-wrap; font: 13.5px/1.55 var(--body); color: var(--text); margin: 0; }
 .update-pref { display: block; margin-top: 14px; }
+
+.pl-sw.gold { grid-column: 1 / -1; }
+.pl-sw.gold span { color: var(--gold-2); font-weight: 500; }

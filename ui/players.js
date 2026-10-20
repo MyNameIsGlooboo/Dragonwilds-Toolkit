@@ -6,6 +6,7 @@
 const P = { players: [], wanted: {}, sig: "" };
 
 const PLAYER_SWITCHES = [
+  { key: "godmode", label: "God mode (everything)", value: 1, gold: true },
   { key: "god", label: "Unlimited health and stamina", value: 1 },
   { key: "nohunger", label: "No hunger, thirst or tiredness", value: 1 },
   { key: "durability", label: "Unlimited durability", value: 1 },
@@ -107,7 +108,7 @@ function friendCard(p) {
   const sws = el("div", "pl-switches");
   for (const s of PLAYER_SWITCHES) {
     const on = w[s.key] != null;
-    const row = el("label", "pl-sw" + (s.warn ? " warn" : "") + (s.test ? " test" : ""));
+    const row = el("label", "pl-sw" + (s.warn ? " warn" : "") + (s.test ? " test" : "") + (s.gold ? " gold" : ""));
     if (s.test) row.title = "New: works from your side only if their game accepts it. Tell me what happens.";
     const sw = el("div", "switch" + (on ? " on" : ""));
     sw.onclick = async (ev) => {

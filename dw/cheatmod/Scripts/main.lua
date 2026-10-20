@@ -15,7 +15,7 @@ local UEHelpers = require("UEHelpers")
 local DIR = "ue4ss/Mods/DWEditorCheats/"
 -- Raise when this script changes. The toolkit compares it with the script it ships and asks
 -- you to restart the game when the running one is older (the game reads it only at start).
-local MOD_VERSION = 5
+local MOD_VERSION = 6
 local CHEAT_CLASSES = {
     "/Script/Dominion.DominionCheatManager",
     "/Script/Engine.CheatManager",
@@ -440,6 +440,59 @@ end
 
 -- Versions before MOD_VERSION 5 changed DamageModifierAttribute (damage taken) for "damage";
 -- put it back once if one of them left it changed.
+-- ---------------------------------------------------------------- god mode
+-- One switch (wanted key "godmode") for everything: it turns on these normal switches...
+local GOD_SWITCHES = { god = 1, durability = 1, nohunger = 1, carry = 999999, damage = 100, walk = 3, xp = 10,
+                       falldamage = 0 }
+-- ...and sets these stats while it's on (put back to normal when it goes off).
+local GOD_ATTRS = {
+    StaminaCostMultiplier = 0, MeleeAttackStaminaCostModifierAttribute = 0, RangedAttackStaminaCostModifierAttribute = 0,
+    MagicAttackStaminaCostModifierAttribute = 0, BlockStaminaCostModifierAttribute = 0, JumpStaminaCost = 0,
+    EvadeStaminaCost = 0, DoubleJumpStaminaCost = 0,
+    CriticalHitChanceBaseAttribute = 1, MaxCriticalHitChanceAttribute = 1,
+    MagicAttackRuneCostMultiplierAttribute = 0, RangedAttackProjectileRefundChanceAttribute = 1,
+    NoCostBuildingChance = 1, ArtisanCraftingNoCostChanceAttribute = 1, ConstructionNoCostRepairBuildingAttribute = 1,
+    ArtisanRepairCostRefundChanceAttribute = 1, RunecraftingRepairCostRefundChanceAttribute = 1,
+    MiningDropAmountAttribute = 2, WoodcuttingDropAmountAttribute = 2,
+    ThreatRangeModifierTypeWildlifeAttribute = 0, Sneakiness = 10,
+    DurabilityLossModifierAttribute = 0,
+}
+-- Status build-ups (poison, bleeding, burning, cold...) are held at 0; they're never "restored".
+local GOD_CLEAR = { "PoisonBuildUp", "BleedingBuildUp", "ColdBuildUp", "BurningBuildUp", "WitherBuildUp",
+                    "ScorchBuildup", "SoulScourgeBuildUp", "ShockedBuildUp" }
+
+-- The switches as they apply: with god mode on, its values replace the single switches.
+local function GodExpand(w)
+    if w.godmode ~= 1 then return w end
+    local e = {}
+    for k, v in pairs(w) do e[k] = v end
+    for k, v in pairs(GOD_SWITCHES) do e[k] = v end
+    return e
+end
+
+-- Extra god-mode stats for one character; D keeps that character's normal values.
+local function ApplyGodAttrs(ac, on, wasOn, D)
+    if not on and not wasOn then return end
+    local idx = AttrIndex(ac)
+    for name, v in pairs(GOD_ATTRS) do
+        if on then pcall(SetAttr, ac, idx, name, v, D) elseif D.attr[name] ~= nil then pcall(SetAttr, ac, idx, name, nil, D) end
+    end
+    if on then
+        for _, name in ipairs(GOD_CLEAR) do
+            local entry = idx[name]
+            if entry and ac.AttributeValues[entry[1]] ~= 0 then
+                entry[2].BaseValue = 0
+                ac.AttributeValues[entry[1]] = 0
+            end
+        end
+        -- special attack always charged
+        local sp, mx = idx["SpecialChargeAttribute"], idx["MaxSpecialChargeAttribute"]
+        if sp and mx and ac.AttributeValues[sp[1]] < ac.AttributeValues[mx[1]] then
+            ac.AttributeValues[sp[1]] = ac.AttributeValues[mx[1]]
+        end
+    end
+end
+
 local function LegacyDamageFix(ac, idx, D)
     if D.legacyDamageDone then return end
     D.legacyDamageDone = true
@@ -453,7 +506,7 @@ end
 local Overlay = { widget = nil, texts = {}, last = {} }
 -- One entry per numpad key: label, wanted key (nil = one-shot action), shown value
 local BAR = {
-    { "1 Health+Stamina", "god" }, { "2 Carry 99999", "carry" }, { "3 Refill" }, { "4 Heal" },
+    { "1 GOD MODE", "godmode" }, { "2 Carry 99999", "carry" }, { "3 Refill" }, { "4 Heal" },
     { "5 Durability", "durability" }, { "6 No hunger", "nohunger" }, { "7 Speed", "walk", 2 },
     { "8 Damage", "damage", 10 }, { "9 Gravestone" }, { ". Back" }, { "0 Normal" }, { "+ Fly", "fly" },
     { "- Home" }, { "/ Set home" }, { "* Hide bar" },
@@ -528,7 +581,7 @@ end
 local function ApplyWanted()
     local pc, p = Pawn()
     if not p then return end
-    local w = ReadWanted()
+    local w = GodExpand(ReadWanted())
     UpdateOverlay(w)
 
     local ac = p.PlayerEncumbranceComponent.AttributesComponent
@@ -615,6 +668,11 @@ local function ApplyWanted()
             end
         end
         LegacyDamageFix(ac, idx, Defaults)
+    end)
+
+    pcall(function()
+        ApplyGodAttrs(ac, w.godmode == 1, Defaults.godOn, Defaults)
+        Defaults.godOn = (w.godmode == 1)
     end)
 
     pcall(function()
@@ -997,6 +1055,11 @@ local function ApplyPlayer(pl, w)
     end)
 
     pcall(function()
+        ApplyGodAttrs(ac, w.godmode == 1, d.on.godmode, d)
+        d.on.godmode = (w.godmode == 1) or nil
+    end)
+
+    pcall(function()
         if w.nohunger == 1 or d.on.hunger then HungerLock(p, w.nohunger == 1, d) end
         d.on.hunger = (w.nohunger == 1) or nil
     end)
@@ -1041,7 +1104,7 @@ local function ApplyPlayers()
     local all = ReadPWanted()
     for _, pl in ipairs(AllPlayers()) do
         if not pl.isLocal and pl.pawn and (all[pl.name] or PDefaults[pl.name]) then
-            pcall(ApplyPlayer, pl, all[pl.name] or {})
+            pcall(ApplyPlayer, pl, GodExpand(all[pl.name] or {}))
         end
     end
 end
@@ -1342,7 +1405,7 @@ Actions["dw.normal"] = function()
 end
 
 local HOTKEYS = {
-    { Key.NUM_ONE, function() Toggle("god", 1) end },
+    { Key.NUM_ONE, function() Toggle("godmode", 1) end },
     { Key.NUM_TWO, function() Toggle("carry", 99999) end },
     { Key.NUM_THREE, function() Do("dw.refill") end },
     { Key.NUM_FOUR, function() Do("dw.heal") end },

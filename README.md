@@ -85,7 +85,7 @@ A backup is made before every save. Changed your mind? **Backups** → **Restore
 
 | Key | Cheat | Key | Cheat |
 |---|---|---|---|
-| Num 1 | No damage + full stamina | Num 9 | Go to my latest gravestone |
+| Num 1 | GOD MODE: everything at once | Num 9 | Go to my latest gravestone |
 | Num 2 | Carry 99999 | Num . | Go back after a teleport |
 | Num 3 | Refill food, water, rest | Num 0 | Everything back to normal |
 | Num 4 | Heal | Num + | Flying |
