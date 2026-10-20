@@ -454,7 +454,7 @@ local GOD_ATTRS = {
     NoCostBuildingChance = 1, ArtisanCraftingNoCostChanceAttribute = 1, ConstructionNoCostRepairBuildingAttribute = 1,
     ArtisanRepairCostRefundChanceAttribute = 1, RunecraftingRepairCostRefundChanceAttribute = 1,
     MiningDropAmountAttribute = 2, WoodcuttingDropAmountAttribute = 2,
-    ThreatRangeModifierTypeWildlifeAttribute = 0, Sneakiness = 10,
+
     DurabilityLossModifierAttribute = 0,
 }
 -- Status build-ups (poison, bleeding, burning, cold...) are held at 0; they're never "restored".

@@ -6,7 +6,7 @@ const C = { status: null, fns: [], wanted: {}, lastSeq: 0, timer: null };
 
 const LIVE = [
   ["God mode", [
-    { type: "switch", key: "godmode", label: "God mode", desc: "Everything at once: unlimited health and stamina, damage dealt ×100, always critical, no stamina cost, no hunger, speed ×3, unlimited durability, carry 999,999, XP ×10, no fall damage, free spells, endless arrows, free building, crafting and repairs, more ore and logs, no poison or bleeding, animals ignore you. Num 1." },
+    { type: "switch", key: "godmode", label: "God mode", desc: "Everything at once: unlimited health and stamina, damage dealt ×100, always critical, no stamina cost, no hunger, speed ×3, unlimited durability, carry 999,999, XP ×10, no fall damage, free spells, endless arrows, free building, crafting and repairs, more ore and logs, no poison or bleeding. Num 1." },
   ]],
   ["Player", [
     { type: "switch", key: "god", label: "Unlimited health and stamina", desc: "Max health 999, healed to full all the time, can't die, stamina always full." },
