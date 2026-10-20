@@ -265,7 +265,7 @@ function controlFor(c) {
 const HOTKEY_HELP = [
   ["Num 1", "God mode (everything) on/off"], ["Num 2", "Carry limit 99999 on/off"], ["Num 3", "Refill food, water, rest"],
   ["Num 4", "Full health and stamina"], ["Num 5", "Unlimited durability on/off"], ["Num 6", "No hunger/thirst/tiredness on/off"],
-  ["Num 7", "Speed ×2 on/off"], ["Num 8", "Damage dealt ×10 on/off"], ["Num 9", "Teleport to my latest gravestone"], ["Num .", "Go back after a teleport"], ["Num 0", "All cheats back to normal"], ["Num +", "Flying on/off"], ["Num −", "Teleport home"], ["Num /", "Set home where you stand"], ["Num *", "Top bar show/hide"],
+  ["Num 7", "Speed ×2 on/off"], ["Num 8", "Damage dealt ×10 on/off"], ["Num 9", "Teleport to my latest gravestone"], ["Num .", "Go back after a teleport"], ["Num 0", "All cheats back to normal"], ["Num +", "Flying on/off"], ["Num −", "Teleport home"], ["Num /", "Set home where you stand"], ["Num *", "Top bar show/hide"], ["F7", "In-game cheat menu (pauses when you play alone)"],
 ];
 
 function drawCheatGroups() {

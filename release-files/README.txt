@@ -31,6 +31,7 @@ positions show on the World map. Only the host needs the toolkit for this.
 Numpad keys in game: 1 GOD MODE (everything), 2 carry 99999, 3 refill food/water/rest, 4 heal,
 5 durability, 6 no hunger, 7 speed, 8 damage x10, 9 latest gravestone, . back after teleport,
 0 all back to normal, + flying, - home, / set home here, * hide/show top bar.
+F7 opens an in-game cheat menu (arrow keys); alone the game pauses while it is open.
 New features (teleport, moving gravestones, unlocks, adding items) are marked
 "check in game" - try them once and restore a backup if anything looks wrong.
 

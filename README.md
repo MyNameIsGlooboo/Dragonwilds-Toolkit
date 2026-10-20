@@ -94,7 +94,7 @@ A backup is made before every save. Changed your mind? **Backups** → **Restore
 | Num 7 | Speed ×2 | Num * | Show/hide the top bar |
 | Num 8 | Damage you deal ×10 | | |
 
-Num Lock must be on. **Uninstall cheats** removes everything from the game folder.
+Num Lock must be on. Press **F7** in game for a cheat menu (arrow keys to use it; the game pauses while it is open when you play alone). **Uninstall cheats** removes everything from the game folder.
 
 ### Playing with friends
 - **Host a friend's world:** they use **Share → Pack world** and send you the zip; you use

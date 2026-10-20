@@ -15,7 +15,7 @@ local UEHelpers = require("UEHelpers")
 local DIR = "ue4ss/Mods/DWEditorCheats/"
 -- Raise when this script changes. The toolkit compares it with the script it ships and asks
 -- you to restart the game when the running one is older (the game reads it only at start).
-local MOD_VERSION = 9
+local MOD_VERSION = 10
 local CHEAT_CLASSES = {
     "/Script/Dominion.DominionCheatManager",
     "/Script/Engine.CheatManager",
@@ -1451,6 +1451,152 @@ local HOTKEYS = {
 for _, hk in ipairs(HOTKEYS) do
     pcall(function() RegisterKeyBind(hk[1], hk[2]) end)
 end
+
+-- ------------------------------------------------------------ in-game menu (F7)
+-- A panel in the middle of the screen listing every cheat. Up/Down choose, Right switches or runs,
+-- Left or F7 closes. Alone, the game pauses while it's open; with friends in your world only your
+-- character freezes (a real pause would stop everyone).
+local MENU_ITEMS = {
+    { "God mode (everything)", "godmode", 1 }, { "Unlimited health and stamina", "god", 1 },
+    { "No hunger, thirst or tiredness", "nohunger", 1 }, { "Unlimited durability", "durability", 1 },
+    { "Carry limit 99999", "carry", 99999 }, { "Damage dealt x10", "damage", 10 }, { "Speed x2", "walk", 2 },
+    { "Jump x3", "jump", 3 }, { "Flying", "fly", 1 }, { "XP x3", "xp", 3 },
+    { "Refill food, water and rest", act = "dw.refill" }, { "Heal", act = "dw.heal" },
+    { "Teleport home", act = "dw.home" }, { "Set home here", act = "dw.sethome" },
+    { "Go to my latest gravestone", act = "dw.grave" }, { "Go back after a teleport", act = "dw.return" },
+    { "Reveal the whole map", act = "dw.revealmap" }, { "Everything back to normal", act = "dw.normal" },
+    { "Hide the top bar", "hideoverlay", 1 },
+}
+local GOLD = { SpecifiedColor = { R = 0.95, G = 0.8, B = 0.45, A = 1.0 }, ColorUseRule = 0 }
+local Menu = { open = false, sel = 1, widget = nil, rows = {}, paused = false, frozen = false, canDieWasSet = false }
+
+local function MenuText(box, tree, name, text, size, color)
+    local t = New("/Script/UMG.TextBlock", tree, name)
+    local font = t.Font
+    font.Size = size
+    t:SetFont(font)
+    t:SetText(FText(text))
+    t:SetColorAndOpacity(color)
+    box:AddChildToVerticalBox(t)
+    return t
+end
+
+local function BuildMenu()
+    local w = New("/Script/UMG.UserWidget", UEHelpers.GetGameInstance(), "DWEditorMenu")
+    w.WidgetTree = New("/Script/UMG.WidgetTree", w, "DWEditorMenuTree")
+    local canvas = New("/Script/UMG.CanvasPanel", w.WidgetTree, "DWEditorMenuCanvas")
+    w.WidgetTree.RootWidget = canvas
+    local border = New("/Script/UMG.Border", w.WidgetTree, "DWEditorMenuBack")
+    border:SetBrushColor({ R = 0.03, G = 0.025, B = 0.02, A = 0.88 })
+    border:SetPadding({ Left = 26.0, Top = 18.0, Right = 26.0, Bottom = 18.0 })
+    local slot = canvas:AddChildToCanvas(border)
+    slot:SetAnchors({ Minimum = { X = 0.5, Y = 0.5 }, Maximum = { X = 0.5, Y = 0.5 } })
+    slot:SetAlignment({ X = 0.5, Y = 0.5 })
+    slot:SetAutoSize(true)
+    local box = New("/Script/UMG.VerticalBox", w.WidgetTree, "DWEditorMenuList")
+    border:SetContent(box)
+    MenuText(box, w.WidgetTree, "DWEditorMenuTitle", "DRAGONWILDS TOOLKIT", 18, GOLD)
+    Menu.hint = MenuText(box, w.WidgetTree, "DWEditorMenuHint", "", 11, GREY)
+    Menu.rows = {}
+    for i = 1, #MENU_ITEMS do
+        Menu.rows[i] = MenuText(box, w.WidgetTree, "DWEditorMenuRow" .. i, "", 14, WHITE)
+    end
+    w:AddToViewport(1000)
+    Menu.widget = w
+    return w
+end
+
+local function DrawMenu()
+    if not (Menu.widget and Menu.widget:IsValid()) then BuildMenu() end
+    local w = ReadWanted()
+    local how = Menu.paused and "Game paused." or (Menu.frozen and "You're frozen (friends keep playing)." or "")
+    Menu.hint:SetText(FText(how .. "   Up/Down choose  -  Right switch  -  Left or F7 close"))
+    for i, item in ipairs(MENU_ITEMS) do
+        local key = item[2]
+        local on = key and w[key] ~= nil
+        local state = key and (on and "   ON" or "   off") or ""
+        local text = (i == Menu.sel and "> " or "   ") .. item[1] .. state
+        Menu.rows[i]:SetText(FText(text))
+        local color = (i == Menu.sel) and GOLD or (key and (on and GREEN or GREY) or WHITE)
+        Menu.rows[i]:SetColorAndOpacity(color)
+    end
+end
+
+local function MenuFreeze(on)
+    local pc, p = Pawn()
+    if not pc then return end
+    if on then
+        local others = 0
+        for _, pl in ipairs(AllPlayers()) do if not pl.isLocal then others = others + 1 end end
+        if others == 0 then
+            local gs = StaticFindObject("/Script/Engine.Default__GameplayStatics")
+            local ok = pcall(function() gs:SetGamePaused(pc, true) end)
+            Menu.paused = ok
+        end
+        if not Menu.paused then
+            pcall(function() pc:SetIgnoreMoveInput(true) end)
+            pcall(function() pc:SetIgnoreLookInput(true) end)
+            pcall(function() if p then p.HealthComponent:SetCanDie(false) end end)
+            Menu.frozen = true
+        end
+    else
+        if Menu.paused then
+            local gs = StaticFindObject("/Script/Engine.Default__GameplayStatics")
+            pcall(function() gs:SetGamePaused(pc, false) end)
+            Menu.paused = false
+        end
+        if Menu.frozen then
+            pcall(function() pc:ResetIgnoreMoveInput() end)
+            pcall(function() pc:ResetIgnoreLookInput() end)
+            -- only let you die again if no cheat keeps you alive
+            local w = ReadWanted()
+            if w.god == nil and w.godmode == nil then
+                pcall(function() if p then p.HealthComponent:SetCanDie(true) end end)
+            end
+            Menu.frozen = false
+        end
+    end
+end
+
+local function SetMenuOpen(open)
+    ExecuteInGameThread(function()
+        pcall(function()
+            if open == Menu.open then return end
+            Menu.open = open
+            if open then
+                MenuFreeze(true)
+                DrawMenu()
+                Menu.widget:SetVisibility(4) -- SelfHitTestInvisible: shown, never takes clicks
+            else
+                if Menu.widget and Menu.widget:IsValid() then Menu.widget:SetVisibility(2) end
+                MenuFreeze(false)
+            end
+        end)
+    end)
+end
+
+local function MenuMove(step)
+    if not Menu.open then return end
+    Menu.sel = (Menu.sel - 1 + step) % #MENU_ITEMS + 1
+    ExecuteInGameThread(function() pcall(DrawMenu) end)
+end
+
+local function MenuActivate()
+    if not Menu.open then return end
+    local item = MENU_ITEMS[Menu.sel]
+    if item[2] then
+        Toggle(item[2], item[3])
+    elseif item.act then
+        Do(item.act)
+    end
+    ExecuteInGameThread(function() pcall(DrawMenu) end)
+end
+
+pcall(function() RegisterKeyBind(Key.F7, function() SetMenuOpen(not Menu.open) end) end)
+pcall(function() RegisterKeyBind(Key.UP_ARROW, function() MenuMove(-1) end) end)
+pcall(function() RegisterKeyBind(Key.DOWN_ARROW, function() MenuMove(1) end) end)
+pcall(function() RegisterKeyBind(Key.RIGHT_ARROW, MenuActivate) end)
+pcall(function() RegisterKeyBind(Key.LEFT_ARROW, function() if Menu.open then SetMenuOpen(false) end end) end)
 
 local function Run(seq, fnName, args)
     if Actions[fnName] then
