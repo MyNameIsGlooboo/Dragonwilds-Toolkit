@@ -15,7 +15,7 @@ local UEHelpers = require("UEHelpers")
 local DIR = "ue4ss/Mods/DWEditorCheats/"
 -- Raise when this script changes. The toolkit compares it with the script it ships and asks
 -- you to restart the game when the running one is older (the game reads it only at start).
-local MOD_VERSION = 6
+local MOD_VERSION = 8
 local CHEAT_CLASSES = {
     "/Script/Dominion.DominionCheatManager",
     "/Script/Engine.CheatManager",
@@ -485,10 +485,16 @@ local function ApplyGodAttrs(ac, on, wasOn, D)
                 ac.AttributeValues[entry[1]] = 0
             end
         end
-        -- special attack always charged
+        -- special attack always charged: the game spends and reads the base value, so fill both
         local sp, mx = idx["SpecialChargeAttribute"], idx["MaxSpecialChargeAttribute"]
-        if sp and mx and ac.AttributeValues[sp[1]] < ac.AttributeValues[mx[1]] then
-            ac.AttributeValues[sp[1]] = ac.AttributeValues[mx[1]]
+        if sp and mx then
+            local full = ac.AttributeValues[mx[1]]
+            if sp[2].BaseValue < full or ac.AttributeValues[sp[1]] < full then
+                sp[2].BaseValue = full
+                ac.AttributeValues[sp[1]] = full
+                -- the HUD bar only redraws when the game announces a change
+                pcall(function() ac:OnAttributeChanged(sp[2]) end)
+            end
         end
     end
 end
@@ -1402,6 +1408,12 @@ Actions["dw.normal"] = function()
     local keep = ReadWanted().hideoverlay
     WriteWanted({ hideoverlay = keep })
     return "all cheats back to normal"
+end
+
+-- Every game starts with all your cheats off (the top bar's show/hide choice is kept).
+do
+    local keep = ReadWanted().hideoverlay
+    WriteWanted({ hideoverlay = keep })
 end
 
 local HOTKEYS = {
