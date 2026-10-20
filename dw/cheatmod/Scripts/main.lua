@@ -15,7 +15,7 @@ local UEHelpers = require("UEHelpers")
 local DIR = "ue4ss/Mods/DWEditorCheats/"
 -- Raise when this script changes. The toolkit compares it with the script it ships and asks
 -- you to restart the game when the running one is older (the game reads it only at start).
-local MOD_VERSION = 8
+local MOD_VERSION = 9
 local CHEAT_CLASSES = {
     "/Script/Dominion.DominionCheatManager",
     "/Script/Engine.CheatManager",
@@ -499,6 +499,19 @@ local function ApplyGodAttrs(ac, on, wasOn, D)
     end
 end
 
+-- Unlimited jumps in the air (the game allows 2: a double jump). D keeps the normal count.
+local function GodJumps(p, on, wasOn, D)
+    if on then
+        if D.attr.jumpCount == nil and p.JumpMaxCount < 50 then
+            D.attr.jumpCount = p.JumpMaxCount
+            D.save("jumpCount", p.JumpMaxCount)
+        end
+        if p.JumpMaxCount ~= 999 then p.JumpMaxCount = 999 end
+    elseif wasOn then
+        p.JumpMaxCount = D.attr.jumpCount or 2
+    end
+end
+
 local function LegacyDamageFix(ac, idx, D)
     if D.legacyDamageDone then return end
     D.legacyDamageDone = true
@@ -678,6 +691,7 @@ local function ApplyWanted()
 
     pcall(function()
         ApplyGodAttrs(ac, w.godmode == 1, Defaults.godOn, Defaults)
+        pcall(GodJumps, p, w.godmode == 1, Defaults.godOn, Defaults)
         Defaults.godOn = (w.godmode == 1)
     end)
 
@@ -1062,6 +1076,7 @@ local function ApplyPlayer(pl, w)
 
     pcall(function()
         ApplyGodAttrs(ac, w.godmode == 1, d.on.godmode, d)
+        pcall(GodJumps, p, w.godmode == 1, d.on.godmode, d)
         d.on.godmode = (w.godmode == 1) or nil
     end)
 
