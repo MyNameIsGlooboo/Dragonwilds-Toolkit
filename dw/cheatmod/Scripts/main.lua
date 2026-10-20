@@ -15,7 +15,7 @@ local UEHelpers = require("UEHelpers")
 local DIR = "ue4ss/Mods/DWEditorCheats/"
 -- Raise when this script changes. The toolkit compares it with the script it ships and asks
 -- you to restart the game when the running one is older (the game reads it only at start).
-local MOD_VERSION = 11
+local MOD_VERSION = 12
 local CHEAT_CLASSES = {
     "/Script/Dominion.DominionCheatManager",
     "/Script/Engine.CheatManager",
@@ -507,8 +507,16 @@ local function GodJumps(p, on, wasOn, D)
             D.save("jumpCount", p.JumpMaxCount)
         end
         if p.JumpMaxCount ~= 999 then p.JumpMaxCount = 999 end
+        -- the game stops extra jumps after falling 1500 units; allow them from any height
+        local m = p.CharacterMovement
+        if D.attr.jumpFallLimit == nil and m.MaxFallDistanceForDoubleJump < 50000 then
+            D.attr.jumpFallLimit = m.MaxFallDistanceForDoubleJump
+            D.save("jumpFallLimit", m.MaxFallDistanceForDoubleJump)
+        end
+        if m.MaxFallDistanceForDoubleJump < 50000 then m.MaxFallDistanceForDoubleJump = 100000.0 end
     elseif wasOn then
         p.JumpMaxCount = D.attr.jumpCount or 2
+        pcall(function() p.CharacterMovement.MaxFallDistanceForDoubleJump = D.attr.jumpFallLimit or 1500.0 end)
     end
 end
 
@@ -1522,40 +1530,53 @@ local function DrawMenu()
     end
 end
 
+-- Online sessions refuse a real pause (SetGamePaused returns false), so: alone, world time is slowed
+-- to almost nothing (everything stops); with friends only your character freezes. Either way you
+-- can't die while the menu is open.
+local FROZEN_TIME = 0.0001
+
 local function MenuFreeze(on)
     local pc, p = Pawn()
     if not pc then return end
+    local gs = StaticFindObject("/Script/Engine.Default__GameplayStatics")
     if on then
         local others = 0
         for _, pl in ipairs(AllPlayers()) do if not pl.isLocal then others = others + 1 end end
         if others == 0 then
-            local gs = StaticFindObject("/Script/Engine.Default__GameplayStatics")
-            local ok = pcall(function() gs:SetGamePaused(pc, true) end)
-            Menu.paused = ok
-        end
-        if not Menu.paused then
-            pcall(function() pc:SetIgnoreMoveInput(true) end)
+            pcall(function() gs:SetGlobalTimeDilation(pc, FROZEN_TIME) end)
+            Menu.paused = true
+        else
+            pcall(function() p.CharacterMovement:FreezeCharacter(pc) end)
             pcall(function() pc:SetIgnoreLookInput(true) end)
-            pcall(function() if p then p.HealthComponent:SetCanDie(false) end end)
             Menu.frozen = true
         end
+        pcall(function() p.HealthComponent:SetCanDie(false) end)
     else
         if Menu.paused then
-            local gs = StaticFindObject("/Script/Engine.Default__GameplayStatics")
-            pcall(function() gs:SetGamePaused(pc, false) end)
+            pcall(function() gs:SetGlobalTimeDilation(pc, 1.0) end)
             Menu.paused = false
         end
         if Menu.frozen then
-            pcall(function() pc:ResetIgnoreMoveInput() end)
+            pcall(function() p.CharacterMovement:UnFreezeCharacter(pc) end)
             pcall(function() pc:ResetIgnoreLookInput() end)
-            -- only let you die again if no cheat keeps you alive
-            local w = ReadWanted()
-            if w.god == nil and w.godmode == nil then
-                pcall(function() if p then p.HealthComponent:SetCanDie(true) end end)
-            end
             Menu.frozen = false
         end
+        -- only let you die again if no cheat keeps you alive
+        local w = ReadWanted()
+        if w.god == nil and w.godmode == nil then
+            pcall(function() p.HealthComponent:SetCanDie(true) end)
+        end
     end
+end
+
+-- keep the freeze while the menu or window is open (the game may reset world time)
+local function KeepFrozen()
+    if not Menu.paused then return end
+    local pc = Pawn()
+    local gs = StaticFindObject("/Script/Engine.Default__GameplayStatics")
+    pcall(function()
+        if gs:GetGlobalTimeDilation(pc) > FROZEN_TIME * 10 then gs:SetGlobalTimeDilation(pc, FROZEN_TIME) end
+    end)
 end
 
 local function SetMenuOpen(open)
@@ -1627,10 +1648,13 @@ end
 
 -- called from the main loop: the toolkit window was closed (Esc, F7 or the close button there)
 local function OverlayWatch()
-    if Menu.overlay and OverlayState() == "closed" then
+    -- closed in the toolkit, or the toolkit itself stopped: resume the game
+    if Menu.overlay and (OverlayState() == "closed" or not ToolkitAlive()) then
         Menu.overlay = false
+        write("overlay.txt", "closed\n")
         ExecuteInGameThread(function() pcall(MenuFreeze, false) end)
     end
+    if Menu.overlay or Menu.open then ExecuteInGameThread(function() pcall(KeepFrozen) end) end
 end
 write("overlay.txt", "closed\n")
 
